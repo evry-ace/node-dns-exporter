@@ -6,7 +6,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/docker/libnetwork/resolvconf"
 	"github.com/docker/libnetwork/types"
@@ -39,7 +41,8 @@ var (
 )
 
 var addr = flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
-var test = flag.String("test-hosts", "", "Comma separated list of hosts to test DNS resolution")
+var test = flag.String("test-hosts", "bt.no,vg.no,example.com", "Comma separated list of hosts to test DNS resolution")
+var testInterval = flag.Int("test-interval-seconds", 10, "Interval in seconds for running test DNS resolution")
 
 func init() {
 	prometheus.MustRegister(promNameserver)
@@ -64,10 +67,23 @@ func main() {
 	}
 
 	for _, host := range testhosts {
-		result, _ := net.LookupHost(host)
-		fmt.Printf("Resolved %s to %s\n", host, result)
-		promHostTest.With(prometheus.Labels{"host": host, "status": "success", "result": strings.Join(result, ",")}).Set(1)
-		promHostTest.With(prometheus.Labels{"host": host, "status": "failed", "result": ""}).Set(0)
+		ticker := time.NewTicker(time.Duration(float64(*testInterval)) * time.Second)
+		quit := make(chan struct{})
+		go func(host string, metric *prometheus.GaugeVec) {
+			for {
+				select {
+				case <-ticker.C:
+					result, _ := net.LookupHost(host)
+					sort.Strings(result)
+					fmt.Printf("Resolved %s to %s\n", host, result)
+					metric.With(prometheus.Labels{"host": host, "status": "success", "result": strings.Join(result, ",")}).Set(1)
+					metric.With(prometheus.Labels{"host": host, "status": "failed", "result": ""}).Set(0)
+				case <-quit:
+					ticker.Stop()
+					return
+				}
+			}
+		}(host, promHostTest)
 	}
 
 	http.Handle("/metrics", promhttp.Handler())
