@@ -120,7 +120,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ghcr.io/${{ github.repository }}:${{ env.BRANCH_NAME }}-${{ env.SHORT_SHA }}
+          tags: ghcr.io/${{ github.repository }}:${{ env.BRANCH_NAME }}-${{ env.SHORT_SHA }},ghcr.io/${{ github.repository }}:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
