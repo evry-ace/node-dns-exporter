@@ -1,7 +1,19 @@
-# node-dns-exporter
+ node-dns-exporter
 
 Prometheus exporter for node level DNS metrics. This is intended to run as a
 DaemonSet in your Kubernetes cluster to report DNS client metrics from each node.
+
+## Usage
+
+```
+Usage of node-dns-exporter:
+  -listen-address string
+        The address to listen on for HTTP requests. (default "127.0.0.1:8080")
+  -test-hosts string
+        Comma separated list of hosts to test DNS resolution (default "nrk.no,vg.no,example.com")
+  -test-interval-seconds int
+        Interval in seconds for running test DNS resolution (default 10)
+```
 
 ## Features
 
