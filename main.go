@@ -68,7 +68,7 @@ func main() {
 		promSearchdomain.With(prometheus.Labels{"host": host}).Inc()
 	}
 
-	testhosts := strings.Split(*test, ",")
+	testhosts := strings.Split(strings.ReplaceAll(*test," ",""), ",")
 	for _, host := range testhosts {
 		ticker := time.NewTicker(time.Duration(float64(*testInterval)) * time.Second)
 		quit := make(chan struct{})
