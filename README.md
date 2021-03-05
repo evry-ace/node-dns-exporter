@@ -1,4 +1,4 @@
- node-dns-exporter
+# node-dns-exporter
 
 Prometheus exporter for node level DNS metrics. This is intended to run as a
 DaemonSet in your Kubernetes cluster to report DNS client metrics from each node.
