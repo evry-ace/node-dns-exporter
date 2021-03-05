@@ -85,11 +85,11 @@ func main() {
 						fmt.Printf("Error: %s\n", resultErr)
 						
 						metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultErr}).Set(1)
-						if(resultPrev != ""){
+						if resultPrev != "" {
 							metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultPrev}).Set(0)
 						}
 						// Reset previous result if it has changed
-						if resultPrevErr != "" && resultErr != resultPrevErr{
+						if resultPrevErr != "" && resultErr != resultPrevErr {
 							metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultPrevErr}).Set(0)
 							resultErr = ""
 						}
@@ -102,7 +102,7 @@ func main() {
 						resultString := strings.Join(result, ",")
 
 						metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultString}).Set(1)
-						if(resultPrevErr != ""){
+						if resultPrevErr != "" {
 							metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultPrevErr}).Set(0)
 						}
 						// Reset previous result if it has changed
