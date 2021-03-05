@@ -74,25 +74,37 @@ func main() {
 		quit := make(chan struct{})
 		go func(host string, metric *prometheus.GaugeVec) {
 			resultPrev := ""
-
+			resultPrevErr := ""
 			for {
 				select {
 				case <-ticker.C:
 					result, err := net.LookupHost(host)
 
 					if err != nil {
-						metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultPrev}).Set(0)
-						metric.With(prometheus.Labels{"host": host, "status": "failed", "result": err.Error()}).Set(1)
+						resultErr := err.Error()
+						fmt.Printf("Error: %s\n", resultErr)
+						
+						metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultErr}).Set(1)
+						if resultPrev != "" {
+							metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultPrev}).Set(0)
+						}
+						// Reset previous result if it has changed
+						if resultPrevErr != "" && resultErr != resultPrevErr {
+							metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultPrevErr}).Set(0)
+							resultErr = ""
+						}
+						
+						resultPrevErr = resultErr
 
 					} else {
 						sort.Strings(result)
 						fmt.Printf("Resolved %s to %s\n", host, result)
-
 						resultString := strings.Join(result, ",")
 
 						metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultString}).Set(1)
-						metric.With(prometheus.Labels{"host": host, "status": "failed", "result": ""}).Set(0)
-
+						if resultPrevErr != "" {
+							metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultPrevErr}).Set(0)
+						}
 						// Reset previous result if it has changed
 						if resultPrev != "" && resultString != resultPrev {
 							metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultPrev}).Set(0)
