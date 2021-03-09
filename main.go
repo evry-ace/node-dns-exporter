@@ -85,7 +85,7 @@ func main() {
 						resultErr := err.Error()
 						resultErrSlice := strings.Split(resultErr, ":")
 						resultErr = strings.TrimPrefix(resultErrSlice[len(resultErrSlice)-1]," ")
-						fmt.Printf("Error: %s\n", resultErr)
+						fmt.Printf("Error: %s\n", err.Error())
 						
 						metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultErr, "node": *nodeName}).Set(1)
 						if resultPrev != "" {
