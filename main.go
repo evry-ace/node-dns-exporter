@@ -83,16 +83,18 @@ func main() {
 
 					if err != nil {
 						resultErr := err.Error()
+						resultErrSlice := strings.Split(resultErr, ":")
+						resultErr = strings.TrimPrefix(resultErrSlice[len(resultErrSlice)-1]," ")
 						fmt.Printf("Error: %s\n", resultErr)
 						
 						metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultErr, "node": *nodeName}).Set(1)
 						if resultPrev != "" {
 							metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultPrev, "node": *nodeName}).Set(0)
+							resultPrev = ""
 						}
-						// Reset previous result if it has changed
+						// Reset previous error result if it has changed
 						if resultPrevErr != "" && resultErr != resultPrevErr {
 							metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultPrevErr, "node": *nodeName}).Set(0)
-							resultErr = ""
 						}
 						
 						resultPrevErr = resultErr
@@ -105,8 +107,9 @@ func main() {
 						metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultString, "node": *nodeName}).Set(1)
 						if resultPrevErr != "" {
 							metric.With(prometheus.Labels{"host": host, "status": "failed", "result": resultPrevErr, "node": *nodeName}).Set(0)
+							resultPrevErr = ""
 						}
-						// Reset previous result if it has changed
+						// Reset previous success result if it has changed
 						if resultPrev != "" && resultString != resultPrev {
 							metric.With(prometheus.Labels{"host": host, "status": "success", "result": resultPrev, "node": *nodeName}).Set(0)
 						}
