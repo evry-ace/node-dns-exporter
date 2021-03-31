@@ -42,6 +42,7 @@ var (
 
 var addr = flag.String("listen-address", "127.0.0.1:8080", "The address to listen on for HTTP requests.")
 var test = flag.String("test-hosts", "nrk.no,vg.no,example.com", "Comma separated list of hosts to test DNS resolution")
+var requiredSearchdomains = flag.String("req-searchdomains","", "Comma separated list of required searchdomains")
 var testInterval = flag.Int("test-interval-seconds", 10, "Interval in seconds for running test DNS resolution")
 var nodeName = flag.String("node-name", "localhost", "The name of the node running the container")
 
@@ -65,6 +66,18 @@ func main() {
 	}
 
 	searchdomains := resolvconf.GetSearchDomains(conf.Content)
+	
+	if *requiredSearchdomains != "" {
+		sort.Strings(searchdomains)
+		reqSearchdomains := strings.Split(strings.ReplaceAll(*requiredSearchdomains," ",""), ",")
+		for _, host := range reqSearchdomains{
+			i := sort.SearchStrings(searchdomains,host)
+			if !(i < len(searchdomains) && searchdomains[i] == host){
+				promSearchdomain.With(prometheus.Labels{"host": host, "node": *nodeName}).Desc()
+			}
+		}
+	}
+
 	for _, host := range searchdomains {
 		promSearchdomain.With(prometheus.Labels{"host": host, "node": *nodeName}).Inc()
 	}
