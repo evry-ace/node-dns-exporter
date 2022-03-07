@@ -21,7 +21,7 @@ jobs:
 
       # The golangci-lint action takes care of caching by itself.
       - name: Lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
 
   test:
     name: Test
