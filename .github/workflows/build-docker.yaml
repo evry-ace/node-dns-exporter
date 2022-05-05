@@ -100,7 +100,7 @@ jobs:
         run: echo "BRANCH_NAME=$(echo -n ${GITHUB_HEAD_REF} | tr -c '[:alnum:]' '-')" >> $GITHUB_ENV
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
