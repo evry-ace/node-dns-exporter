@@ -1,6 +1,6 @@
 module github.com/evry-ace/dns-test
 
-go 1.15
+go 1.19
 
 require (
 	github.com/docker/docker v20.10.3+incompatible // indirect
